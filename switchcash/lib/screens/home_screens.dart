@@ -4,8 +4,6 @@ import 'package:switchcash/data/history_data.dart';
 import 'package:switchcash/models/currecy_model.dart';
 import 'package:switchcash/widgets/costum_button.dart';
 
-import 'package:flutter/services.dart';
-
 class HomeScreens extends StatefulWidget {
   const HomeScreens({Key? key}) : super(key: key);
 
@@ -52,23 +50,23 @@ class _HomeScreensState extends State<HomeScreens> {
       Map<String, dynamic> responseData = await api.getCurrencyRates();
       CurrencyModel currencyData = CurrencyModel.fromJson(responseData);
 
-      if (currencyData.rates.containsKey(baseCurrency) &&
-          currencyData.rates.containsKey(targetCurrency)) {
+      if (currencyData.rates.containsKey(baseCurrency) && currencyData.rates.containsKey(targetCurrency)) {
         double fromRate = double.parse(currencyData.rates[baseCurrency].toString());
         double toRate = double.parse(currencyData.rates[targetCurrency].toString());
 
-        double amountInUSD = (baseCurrency != "USD") ? (amount / fromRate) : amount;
-
+ 
+        double amountInUSD = amount / fromRate;
         double convertedAmount = amountInUSD * toRate;
 
         setState(() {
           result = '$amount $baseCurrency equals $convertedAmount $targetCurrency';
         });
 
+
         await _saveToHistory(result);
       } else {
         setState(() {
-          result = 'Invalid currency input';
+          result = 'Invalid currency code!';
         });
       }
     } catch (e) {
@@ -80,8 +78,9 @@ class _HomeScreensState extends State<HomeScreens> {
 
   Future<void> _saveToHistory(String entry) async {
     await HistoryData.saveHistory(entry);
+    List<String> updatedHistory = await HistoryData.getHistory();
     setState(() {
-      history.add(entry);
+      history = updatedHistory; 
     });
   }
 
@@ -105,21 +104,21 @@ class _HomeScreensState extends State<HomeScreens> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CustomTextBox(
-              hintText: 'Masukan Currency yang mau ditukar',
+              hintText: 'Masukan Currency yang akan di convert',
               controller: _baseCurrencyController,
               isPassword: false,
               keyboardType: TextInputType.text,
             ),
             const SizedBox(height: 10),
             CustomTextBox(
-              hintText: 'Masukan Currency yang diinginkan',
+              hintText: 'Masukan Currency target',
               controller: _targetCurrencyController,
               isPassword: false,
               keyboardType: TextInputType.text,
             ),
             const SizedBox(height: 10),
             CustomTextBox(
-              hintText: 'Jumlah uang yang akan di tukar',
+              hintText: 'Enter amount',
               controller: _amountController,
               isPassword: false,
               keyboardType: TextInputType.number,
@@ -127,7 +126,7 @@ class _HomeScreensState extends State<HomeScreens> {
             const SizedBox(height: 20),
             Center(
               child: CustomButton(
-                text: 'Konversi',
+                text: 'Convert',
                 onPressed: _convertCurrency,
               ),
             ),

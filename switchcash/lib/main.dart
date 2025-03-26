@@ -28,7 +28,7 @@ class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
   final List<Widget> _screens = [
     HomeScreens(),
-    history_Screen(),
+    HistoryScreens(),
   ];
 
 
